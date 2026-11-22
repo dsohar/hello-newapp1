@@ -110,7 +110,7 @@ podTemplate(containers: [
 
         stage('add-dashboard') {
             container('deployer') {
-                echo "Adding dashboard to ${gitopsRepo} -> ${dashboardGitopsFile}"
+                echo "Adding dashboard to ${gitopsRepo} -> ${dashboardFile}"
 
                 withCredentials([usernamePassword(credentialsId: 'github-credentials', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
                     sh """#!/bin/sh
