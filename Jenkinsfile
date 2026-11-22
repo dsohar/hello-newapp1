@@ -50,10 +50,10 @@ podTemplate(containers: [
         stage('push') {
             container('docker') {
                 // TAGS: <BUILD_NUMBER> (immutable, deployed by GitOps) and latest
-                withDockerRegistry(url: 'https://index.docker.io/v1/', credentialsId: 'dockerhub-creds') 
-                {
+                withCredentials([usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_TOKEN')]){
                     sh """
                         set -e
+                        echo "\$DOCKER_TOKEN" | docker login -u "\$DOCKER_USER" --password-stdin
                         docker push ${appimage}:${apptag}
                         docker push ${appimage}:latest
                         docker logout
