@@ -25,6 +25,9 @@ def department  = params.DEPARTMENT ?: 'digital'
 def serviceMon  = params.SERVICE_MONITOR ? 'true' : 'false'
 def gitopsRepo  = "github.com/elevy99927-demos/gitops.git"
 def gitopsFile  = "systems/${department}/${envName}/${appname}.yaml"
+def dashboardFile = "dashboards/${appname}.json"
+def dashboardSource = "grafana-dashboard.json"
+
 
 podTemplate(containers: [
       containerTemplate(name: 'jnlp', image: 'jenkins/inbound-agent', ttyEnabled: true),
@@ -107,9 +110,32 @@ podTemplate(containers: [
 
         stage('add-dashboard') {
             container('deployer') {
-                sh """
-                    echo " TBD: Add dashboard to grafana"
-                """
+                echo "Adding dashboard to ${gitopsRepo} -> ${dashboardGitopsFile}"
+
+                withCredentials([usernamePassword(credentialsId: 'github-credentials', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+                    sh """#!/bin/sh
+                        set -e
+                        command -v git >/dev/null || apk add --no-cache git
+
+                        rm -rf gitops-dashboard
+                        git clone https://\${GIT_USER}:\${GIT_TOKEN}@${gitopsRepo} gitops-dashboard
+                        cd gitops-dashboard
+                        git config user.name "Jenkins (${user})"
+                        git config user.email "elevy99927-demos@users.noreply.github.com"
+
+                        mkdir -p "\$(dirname "${dashboardGitopsFile}")"
+                        cp "${env.WORKSPACE}/${dashboardSource}" "${dashboardGitopsFile}"
+
+                        git add "${dashboardGitopsFile}"
+                        if git diff --cached --quiet; then
+                            echo "Dashboard unchanged - nothing to update"
+                            exit 0
+                        fi
+
+                        git commit -m "Update dashboard for ${appname} (build ${env.BUILD_NUMBER})"
+                        git push origin HEAD:main
+                    """
+                }
             }
         }
     }
