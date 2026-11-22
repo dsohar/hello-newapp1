@@ -18,7 +18,7 @@ pod:
   port: 80
 
 serviceMonitor:
-  enabled: true
+  enabled: false
   labels:
     release: prometheus
     app: monitoring
