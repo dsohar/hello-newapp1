@@ -10,8 +10,8 @@
 properties([
   parameters([
     choice(name: 'ENV', choices: ['dev', 'qa', 'prd'], description: 'Environment folder: systems/<DEPARTMENT>/<ENV>/'),
-    string(name: 'DEPARTMENT', defaultValue: 'devops', description: 'Department folder: hr, finance, legal, digital, devops'),
-    booleanParam(name: 'SERVICE_MONITOR', defaultValue: false, description: 'Render the ServiceMonitor (needs the Prometheus Operator CRDs in the cluster)'),
+    string(name: 'DEPARTMENT', defaultValue: 'digital', description: 'Department folder: hr, finance, legal, digital, devops'),
+    booleanParam(name: 'SERVICE_MONITOR', defaultValue: true, description: 'Render the ServiceMonitor (needs the Prometheus Operator CRDs in the cluster)'),
     choice(name: 'DIND_STORAGE_DRIVER', choices: ['overlay2', 'vfs'], description: 'dind storage driver: overlay2 (fast). Use vfs only if overlay2 fails on your nodes (slow, uses more disk)')
   ])
 ])
@@ -21,7 +21,7 @@ def appname     = "customer-portal"
 def appimage    = "${user}/${appname}"      // docker.io/<user>/helloworld
 def apptag      = "${env.BUILD_NUMBER}"
 def envName     = params.ENV ?: 'dev'
-def department  = params.DEPARTMENT ?: 'devops'
+def department  = params.DEPARTMENT ?: 'digital'
 def serviceMon  = params.SERVICE_MONITOR ? 'true' : 'false'
 def gitopsRepo  = "github.com/elevy99927-demos/gitops.git"
 def gitopsFile  = "systems/${department}/${envName}/${appname}.yaml"
