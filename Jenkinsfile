@@ -6,11 +6,11 @@
 
 
 def user        = "elevy99927"              // your name: Docker Hub user AND gitops file name
-def appname     = "helloworld"
+def appname     = "CustomerPortal"
 def appimage    = "${user}/${appname}"      // docker.io/<user>/helloworld
 def apptag      = "${env.BUILD_NUMBER}"
 def envName     = "dev"
-def department  = "devops"
+def department  = "digital"
 
 def gitopsRepo  = "github.com/elevy99927-demos/gitops.git"
 def gitopsFile  = "systems/${department}/${envName}/${user}.yaml"
