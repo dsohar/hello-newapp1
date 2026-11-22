@@ -123,10 +123,10 @@ podTemplate(containers: [
                         git config user.name "Jenkins (${user})"
                         git config user.email "elevy99927-demos@users.noreply.github.com"
 
-                        mkdir -p "\$(dirname "${dashboardGitopsFile}")"
-                        cp "${env.WORKSPACE}/${dashboardSource}" "${dashboardGitopsFile}"
+                        mkdir -p "\$(dirname "${dashboardFile}")"
+                        cp "${env.WORKSPACE}/${dashboardSource}" "${dashboardFile}"
 
-                        git add "${dashboardGitopsFile}"
+                        git add "${dashboardFile}"
                         if git diff --cached --quiet; then
                             echo "Dashboard unchanged - nothing to update"
                             exit 0
