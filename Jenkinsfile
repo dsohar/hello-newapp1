@@ -6,7 +6,7 @@
 
 
 def user        = "dsohar"              // your name: Docker Hub user AND gitops file name
-def appname     = "CustomerPortal"
+def appname     = "customerportal"
 def appimage    = "${user}/${appname}"      // docker.io/<user>/helloworld
 def apptag      = "${env.BUILD_NUMBER}"
 def envName     = "dev"
