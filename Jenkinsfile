@@ -50,7 +50,8 @@ podTemplate(containers: [
         stage('push') {
             container('docker') {
                 // TAGS: <BUILD_NUMBER> (immutable, deployed by GitOps) and latest
-                withCredentials('https://index.docker.io/v1/', 'dockerhub-creds') {
+                withDockerRegistry(url: 'https://index.docker.io/v1/', credentialsId: 'dockerhub-creds') 
+                {
                     sh """
                         set -e
                         docker push ${appimage}:${apptag}
