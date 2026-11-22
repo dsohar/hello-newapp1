@@ -2,16 +2,27 @@
 // render the Helm chart, and commit the rendered manifests to
 //   https://github.com/elevy99927-demos/gitops  ->  systems/<DEPARTMENT>/<ENV>/<user>.yaml
 // Argo CD (ApplicationSet/systems-manifests.yaml) deploys that file.
+//
+// Build agent: privileged docker-in-docker. It runs on any Kubernetes that allows privileged pods
+// (EKS EC2 nodes, Rancher RKE2/k3s, OpenShift with the privileged SCC, minikube/kind) - see README.md.
+// It doesn't use the node's container runtime (containerd/CRI-O), so the runtime doesn't matter.
 
-
+properties([
+  parameters([
+    choice(name: 'ENV', choices: ['dev', 'qa', 'prd'], description: 'Environment folder: systems/<DEPARTMENT>/<ENV>/'),
+    string(name: 'DEPARTMENT', defaultValue: 'devops', description: 'Department folder: hr, finance, legal, digital, devops'),
+    booleanParam(name: 'SERVICE_MONITOR', defaultValue: false, description: 'Render the ServiceMonitor (needs the Prometheus Operator CRDs in the cluster)'),
+    choice(name: 'DIND_STORAGE_DRIVER', choices: ['overlay2', 'vfs'], description: 'dind storage driver: overlay2 (fast). Use vfs only if overlay2 fails on your nodes (slow, uses more disk)')
+  ])
+])
 
 def user        = "dsohar"              // your name: Docker Hub user AND gitops file name
-def appname     = "customerportal"
+def appname     = "customer-portal"
 def appimage    = "${user}/${appname}"      // docker.io/<user>/helloworld
 def apptag      = "${env.BUILD_NUMBER}"
-def envName     = "dev"
-def department  = "digital"
-
+def envName     = params.ENV ?: 'dev'
+def department  = params.DEPARTMENT ?: 'devops'
+def serviceMon  = params.SERVICE_MONITOR ? 'true' : 'false'
 def gitopsRepo  = "github.com/elevy99927-demos/gitops.git"
 def gitopsFile  = "systems/${department}/${envName}/${appname}.yaml"
 
@@ -76,7 +87,7 @@ podTemplate(containers: [
                     git config user.name  "Jenkins (${user})"
                     git config user.email "elevy99927-demos@users.noreply.github.com"
 
-                    helm template ${user} "${env.WORKSPACE}/chart" \\
+                    helm template ${appname} "${env.WORKSPACE}/chart" \\
                         --set image.repository=${appimage} \\
                         --set image.tag=${apptag} \\
                         > ${gitopsFile}
